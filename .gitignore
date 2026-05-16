@@ -1,3 +1,4 @@
 app/venv/
 app/.env
-.workspace
+app/.workspace
+app/blog/posts
