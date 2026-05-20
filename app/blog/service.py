@@ -11,6 +11,7 @@ from blog.agents.blog_post_writer.schema import BlogPostWriterRequest
 from blog.agents.blog_reviewer.agent import BlogReviewerAgent
 from blog.agents.blog_reviewer.schema import BlogReviewerRequest, BlogReviewerResponse
 from blog.contants import BLOG_POSTS_OUTPUT_DIR
+from blog.frontmatter import ensure_required_frontmatter
 
 
 class BlogPostService:
@@ -52,16 +53,20 @@ class BlogPostService:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         try:
             response = self.writer_agent.organize_notes(BlogPostWriterRequest(context=context))
-            output_path.write_text(response.reviewed_markdown, encoding="utf-8")
+            normalized_reviewed_markdown = ensure_required_frontmatter(response.reviewed_markdown)
+            output_path.write_text(normalized_reviewed_markdown, encoding="utf-8")
 
             translated_response = self.translator_agent.translate(
-                BlogPostTranslatorRequest(content=response.reviewed_markdown)
+                BlogPostTranslatorRequest(content=normalized_reviewed_markdown)
             )
             pt_br_output_path = output_path.with_name(
                 f"{output_path.stem}_pt_br{output_path.suffix}"
             )
+            normalized_translated_markdown = ensure_required_frontmatter(
+                translated_response.translated_markdown
+            )
             pt_br_output_path.write_text(
-                translated_response.translated_markdown,
+                normalized_translated_markdown,
                 encoding="utf-8",
             )
         except Exception as exc:

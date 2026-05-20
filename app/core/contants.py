@@ -14,6 +14,7 @@ class LLM(str, Enum):
 
 class OpenAIModel(str, Enum):
     GPT_4O_MINI = "gpt-4o-mini"
+    GPT_4O = "gpt-4o"
 
 
 class GroqModel(str, Enum):

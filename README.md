@@ -63,4 +63,5 @@ docker run --env-file .env -p 3015:80 blog-reviewer-app
 ## Notes
 - Only `.md` files are accepted in `organize-notes`.
 - Output filenames are derived from the uploaded filename and written under `blog/posts/`.
+- Generated posts always include YAML metadata frontmatter with required fields: `title`, `date`, `summary`, `tags`, and `published`.
 - Do not commit `.env` or real API keys.
