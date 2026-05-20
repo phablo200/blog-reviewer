@@ -3,6 +3,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from blog import router as blog_post
+from core.middleware.required_headers import RequiredHeadersMiddleware
 
 app = FastAPI(title="MeBrain Agents API")
 logging.basicConfig(
@@ -27,6 +28,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(RequiredHeadersMiddleware)
 
 app.include_router(blog_post.router)
 
