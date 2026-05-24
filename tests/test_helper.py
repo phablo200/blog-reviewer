@@ -1,6 +1,7 @@
+from pathlib import Path
 from types import SimpleNamespace
 
-from blog.helper import process_and_save_markdown
+import blog.helper as helper
 
 
 class _WriterAgentStub:
@@ -18,10 +19,17 @@ class _FailingWriterAgentStub:
         raise RuntimeError("writer failed")
 
 
-def test_process_and_save_markdown_writes_reviewed_and_translated_files(tmp_path) -> None:
+def test_process_and_save_markdown_writes_reviewed_and_translated_files(tmp_path, monkeypatch) -> None:
     output_path = tmp_path / "my-post_reviewd.md"
+    generated_pdfs: list[Path] = []
 
-    process_and_save_markdown(
+    def _fake_render_markdown_to_pdf(_markdown_content: str, output_pdf_path: Path) -> None:
+        output_pdf_path.write_text("pdf-content", encoding="utf-8")
+        generated_pdfs.append(output_pdf_path)
+
+    monkeypatch.setattr(helper, "render_markdown_to_pdf", _fake_render_markdown_to_pdf)
+
+    helper.process_and_save_markdown(
         context="# Title",
         output_path=output_path,
         writer_agent=_WriterAgentStub(),
@@ -30,12 +38,18 @@ def test_process_and_save_markdown_writes_reviewed_and_translated_files(tmp_path
 
     assert output_path.exists()
     assert output_path.with_name("my-post_reviewd_pt_br.md").exists()
+    assert output_path.with_suffix(".pdf").exists()
+    assert output_path.with_name("my-post_reviewd_pt_br.pdf").exists()
+    assert generated_pdfs == [
+        output_path.with_suffix(".pdf"),
+        output_path.with_name("my-post_reviewd_pt_br.pdf"),
+    ]
 
 
 def test_process_and_save_markdown_writes_error_file_on_failure(tmp_path) -> None:
     output_path = tmp_path / "my-post_reviewd.md"
 
-    process_and_save_markdown(
+    helper.process_and_save_markdown(
         context="# Title",
         output_path=output_path,
         writer_agent=_FailingWriterAgentStub(),

@@ -95,6 +95,6 @@
   - Mitigation: keep generation in same async task and monitor latency; defer queueing redesign unless required.
 
 ## Open Questions
-- Should `/outputs/makdown` also gain a corrected alias `/outputs/markdown` in this same change?
-- Should PDF listing include timestamps (`created_at` / `updated_at`) for UI sorting/filtering?
-- If EN PDF generation succeeds but PT-BR PDF generation fails, should partial outputs be retained or rolled back?
+- Should `/outputs/makdown` also gain a corrected alias `/outputs/markdown` in this same change? Yes.
+- Should PDF listing include timestamps (`created_at` / `updated_at`) for UI sorting/filtering? Yes.
+- If EN PDF generation succeeds but PT-BR PDF generation fails, should partial outputs be retained or rolled back? Rolled all back.

@@ -9,7 +9,7 @@ from blog.agents.blog_post_translator.agent import BlogPostTranslatorAgent
 from blog.agents.blog_reviewer.agent import BlogReviewerAgent
 from blog.agents.blog_reviewer.schema import BlogReviewerRequest, BlogReviewerResponse
 from blog.contants import BLOG_POSTS_OUTPUT_DIR
-from blog.helper import list_markdown_files, process_and_save_markdown
+from blog.helper import list_markdown_files, list_output_files, process_and_save_markdown
 from pathlib import Path
 
 
@@ -57,4 +57,9 @@ class BlogPostService:
     def list_markdown_outputs(self) -> dict[str, Any]:
         """List generated markdown outputs available in the public output folder."""
         items = list_markdown_files(self.output_dir)
+        return {"items": items, "count": len(items)}
+
+    def list_pdf_outputs(self) -> dict[str, Any]:
+        """List generated PDF outputs available in the public output folder."""
+        items = list_output_files(self.output_dir, ".pdf")
         return {"items": items, "count": len(items)}

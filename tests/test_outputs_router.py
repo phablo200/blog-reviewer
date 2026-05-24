@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from blog.helper import list_markdown_files
+from blog.helper import list_markdown_files, list_output_files
 from blog.service import BlogPostService
 
 
@@ -31,5 +31,31 @@ def test_list_markdown_outputs_response_shape(tmp_path) -> None:
 
     assert payload == {
         "items": [{"filename": "post.md", "path": "public/markdowns/post.md"}],
+        "count": 1,
+    }
+
+
+def test_list_output_files_returns_sorted_pdf_files(tmp_path) -> None:
+    (tmp_path / "b-file.pdf").write_text("b", encoding="utf-8")
+    (tmp_path / "a-file.pdf").write_text("a", encoding="utf-8")
+    (tmp_path / "notes.md").write_text("x", encoding="utf-8")
+
+    items = list_output_files(tmp_path, ".pdf")
+
+    assert items == [
+        {"filename": "a-file.pdf", "path": "public/markdowns/a-file.pdf"},
+        {"filename": "b-file.pdf", "path": "public/markdowns/b-file.pdf"},
+    ]
+
+
+def test_list_pdf_outputs_response_shape(tmp_path) -> None:
+    (tmp_path / "post.pdf").write_text("pdf", encoding="utf-8")
+    service = BlogPostService.__new__(BlogPostService)
+    service.output_dir = Path(tmp_path)
+
+    payload = service.list_pdf_outputs()
+
+    assert payload == {
+        "items": [{"filename": "post.pdf", "path": "public/markdowns/post.pdf"}],
         "count": 1,
     }
