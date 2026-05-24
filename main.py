@@ -31,6 +31,7 @@ app.add_middleware(
 app.add_middleware(RequiredHeadersMiddleware)
 
 app.include_router(blog_post.router)
+app.include_router(blog_post.outputs_router)
 
 @app.get("/")
 def root() -> dict[str, str]:

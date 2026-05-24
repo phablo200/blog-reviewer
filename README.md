@@ -15,7 +15,7 @@ FastAPI service that converts raw Markdown notes into a reviewed blog post, tran
 - `blog/router.py`: API routes (`/blog-post-writer/*`).
 - `blog/service.py`: orchestration for writer, translator, and reviewer agents.
 - `blog/agents/`: feature-specific agents and schemas.
-- `blog/posts/`: generated output markdown files.
+- `public/markdowns/`: generated output markdown files.
 - `core/`: shared config and LLM setup.
 
 ## Requirements
@@ -54,6 +54,14 @@ curl -X POST http://127.0.0.1:3015/blog-post-writer/organize-notes \
 
 Returns output path for the reviewed file. The service also writes a translated file with `_pt_br` suffix.
 
+### `GET /outputs/makdown`
+Lists generated markdown files available under `public/markdowns`.
+
+Example:
+```bash
+curl http://127.0.0.1:3015/outputs/makdown
+```
+
 ## Docker
 ```bash
 docker build -t blog-reviewer-app .
@@ -62,6 +70,6 @@ docker run --env-file .env -p 3015:80 blog-reviewer-app
 
 ## Notes
 - Only `.md` files are accepted in `organize-notes`.
-- Output filenames are derived from the uploaded filename and written under `blog/posts/`.
+- Output filenames are derived from the uploaded filename and written under `public/markdowns/`.
 - Generated posts always include YAML metadata frontmatter with required fields: `title`, `date`, `summary`, `tags`, and `published`.
 - Do not commit `.env` or real API keys.

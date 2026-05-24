@@ -40,3 +40,6 @@
 - Never commit `.env` or real API keys.
 - Copy `.env.example` to `.env` and set `OPENAI_API_KEY`, `GROQ_API_KEY`, model names, and `MEBRAIN_SYSTEM_API_URL` per environment.
 - Treat files under `blog/posts/` as generated artifacts unless intentionally curated.
+
+## Rules
+- Read `.codex/instructions.md` to specific rules of this system.
