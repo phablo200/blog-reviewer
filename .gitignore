@@ -1,4 +1,6 @@
-app/venv/
-app/.env
-app/.workspace
-app/blog/posts
+.env
+venv
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.workspace
