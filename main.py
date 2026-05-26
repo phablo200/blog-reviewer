@@ -35,4 +35,4 @@ app.include_router(blog_post.outputs_router)
 
 @app.get("/")
 def root() -> dict[str, str]:
-    return {"message": "MeBrain Agents API is running 🚀"}
+    return {"message": "LabsReview Agents API is running 🚀"}
