@@ -4,4 +4,5 @@ __pycache__/
 **/__pycache__/
 *.py[cod]
 .workspace
-public
+public/markdown/*
+public/pdf/*
