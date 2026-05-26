@@ -10,8 +10,8 @@ outputs_router = APIRouter(prefix="/outputs", tags=["Outputs"])
 service = LabPostService()
 
 
-@router.post("/organize-notes")
-async def organize_notes(
+@router.post("/review")
+async def review(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
 ) -> dict[str, str]:
