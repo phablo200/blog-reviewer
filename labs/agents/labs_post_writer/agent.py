@@ -4,8 +4,8 @@ import logging
 
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from labs.agents.blog_reviewer.agent import LabReviewerAgent
-from labs.agents.blog_reviewer.schema import LabReviewerRequest
+from labs.agents.labs_reviewer.agent import LabReviewerAgent
+from labs.agents.labs_reviewer.schema import LabReviewerRequest
 from core.llm_config import LLMProvider, build_chat_model
 
 from .helper import enrich_context_with_repositories

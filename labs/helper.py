@@ -6,8 +6,8 @@ import logging
 from markdown import markdown
 from weasyprint import HTML
 
-from labs.agents.blog_post_translator.schema import LabPostTranslatorRequest
-from labs.agents.blog_post_writer.schema import LabPostWriterRequest
+from labs.agents.labs_post_translator.schema import LabPostTranslatorRequest
+from labs.agents.labs_post_writer.schema import LabPostWriterRequest
 from labs.contants import PUBLIC_PDF_DIR
 from labs.frontmatter import ensure_required_frontmatter
 

@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, BackgroundTasks, File, HTTPException, UploadFile
 
-from labs.agents.blog_reviewer.schema import LabReviewerRequest, LabReviewerResponse
+from labs.agents.labs_reviewer.schema import LabReviewerRequest, LabReviewerResponse
 from labs.service import LabPostService
 
 router = APIRouter(prefix="/labs", tags=["Blog Post Writer"])

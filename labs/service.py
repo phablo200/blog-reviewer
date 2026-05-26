@@ -4,10 +4,10 @@ from typing import Any
 
 from fastapi import BackgroundTasks, HTTPException
 
-from labs.agents.blog_post_writer.agent import LabPostWriterAgent
-from labs.agents.blog_post_translator.agent import LabPostTranslatorAgent
-from labs.agents.blog_reviewer.agent import LabReviewerAgent
-from labs.agents.blog_reviewer.schema import LabReviewerRequest, LabReviewerResponse
+from labs.agents.labs_post_writer.agent import LabPostWriterAgent
+from labs.agents.labs_post_translator.agent import LabPostTranslatorAgent
+from labs.agents.labs_reviewer.agent import LabReviewerAgent
+from labs.agents.labs_reviewer.schema import LabReviewerRequest, LabReviewerResponse
 from labs.contants import PUBLIC_MARKDOWN_DIR, PUBLIC_PDF_DIR
 from labs.helper import list_markdown_files, list_output_files, process_and_save_markdown
 from pathlib import Path
