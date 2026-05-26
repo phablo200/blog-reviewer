@@ -9,7 +9,8 @@ from labs.agents.labs_post_translator.agent import LabPostTranslatorAgent
 from labs.agents.labs_reviewer.agent import LabReviewerAgent
 from labs.agents.labs_reviewer.schema import LabReviewerRequest, LabReviewerResponse
 from labs.contants import PUBLIC_MARKDOWN_DIR, PUBLIC_PDF_DIR
-from labs.helper import list_markdown_files, list_output_files, process_and_save_markdown
+from labs.helpers.markdown_helper import MarkdownHelper
+from labs.helpers.pdf_helper import PDFHelper
 from pathlib import Path
 
 
@@ -39,7 +40,7 @@ class LabPostService:
         output_name = f"{original_name.stem}_reviewd{original_name.suffix or '.md'}"
         output_path = self.markdown_output_dir / output_name
         background_tasks.add_task(
-            process_and_save_markdown,
+            MarkdownHelper.process_and_save_markdown,
             context,
             output_path,
             self.writer_agent,
@@ -57,10 +58,10 @@ class LabPostService:
 
     def list_markdown_outputs(self) -> dict[str, Any]:
         """List generated markdown outputs available in the public output folder."""
-        items = list_markdown_files(self.markdown_output_dir)
+        items = MarkdownHelper.list_markdown_files(self.markdown_output_dir)
         return {"items": items, "count": len(items)}
 
     def list_pdf_outputs(self) -> dict[str, Any]:
         """List generated PDF outputs available in the public output folder."""
-        items = list_output_files(self.pdf_output_dir, ".pdf", "pdf")
+        items = PDFHelper.list_output_files(self.pdf_output_dir, ".pdf", "pdf")
         return {"items": items, "count": len(items)}

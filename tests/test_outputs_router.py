@@ -1,6 +1,7 @@
 from pathlib import Path
 
-from labs.helper import list_markdown_files, list_output_files
+from labs.helpers.markdown_helper import MarkdownHelper
+from labs.helpers.pdf_helper import PDFHelper
 from labs.service import LabPostService
 
 
@@ -9,7 +10,7 @@ def test_list_markdown_files_returns_sorted_markdown_files(tmp_path) -> None:
     (tmp_path / "a-file.md").write_text("a", encoding="utf-8")
     (tmp_path / "notes.txt").write_text("x", encoding="utf-8")
 
-    items = list_markdown_files(tmp_path)
+    items = MarkdownHelper.list_markdown_files(tmp_path)
 
     assert items == [
         {"filename": "a-file.md", "path": "public/markdown/a-file.md"},
@@ -18,7 +19,7 @@ def test_list_markdown_files_returns_sorted_markdown_files(tmp_path) -> None:
 
 
 def test_list_markdown_files_returns_empty_for_missing_directory(tmp_path) -> None:
-    items = list_markdown_files(tmp_path / "missing")
+    items = MarkdownHelper.list_markdown_files(tmp_path / "missing")
     assert items == []
 
 
@@ -41,7 +42,7 @@ def test_list_output_files_returns_sorted_pdf_files(tmp_path) -> None:
     (tmp_path / "a-file.pdf").write_text("a", encoding="utf-8")
     (tmp_path / "notes.md").write_text("x", encoding="utf-8")
 
-    items = list_output_files(tmp_path, ".pdf", "pdf")
+    items = PDFHelper.list_output_files(tmp_path, ".pdf", "pdf")
 
     assert items == [
         {"filename": "a-file.pdf", "path": "public/pdf/a-file.pdf"},

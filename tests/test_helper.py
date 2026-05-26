@@ -1,7 +1,9 @@
 from pathlib import Path
 from types import SimpleNamespace
 
-import labs.helper as helper
+from labs.helpers.markdown_helper import MarkdownHelper
+from labs.helpers import markdown_helper
+from labs.helpers.pdf_helper import PDFHelper
 
 
 class _WriterAgentStub:
@@ -28,10 +30,10 @@ def test_process_and_save_markdown_writes_reviewed_and_translated_files(tmp_path
         output_pdf_path.write_text("pdf-content", encoding="utf-8")
         generated_pdfs.append(output_pdf_path)
 
-    monkeypatch.setattr(helper, "render_markdown_to_pdf", _fake_render_markdown_to_pdf)
-    monkeypatch.setattr(helper, "PUBLIC_PDF_DIR", pdf_dir)
+    monkeypatch.setattr(PDFHelper, "render_markdown_to_pdf", _fake_render_markdown_to_pdf)
+    monkeypatch.setattr(markdown_helper, "PUBLIC_PDF_DIR", pdf_dir)
 
-    helper.process_and_save_markdown(
+    MarkdownHelper.process_and_save_markdown(
         context="# Title",
         output_path=output_path,
         writer_agent=_WriterAgentStub(),
@@ -51,7 +53,7 @@ def test_process_and_save_markdown_writes_reviewed_and_translated_files(tmp_path
 def test_process_and_save_markdown_writes_error_file_on_failure(tmp_path) -> None:
     output_path = tmp_path / "my-post_reviewd.md"
 
-    helper.process_and_save_markdown(
+    MarkdownHelper.process_and_save_markdown(
         context="# Title",
         output_path=output_path,
         writer_agent=_FailingWriterAgentStub(),
@@ -72,10 +74,10 @@ def test_process_and_save_markdown_preserves_markdown_when_pdf_generation_fails(
     def _failing_render_markdown_to_pdf(_markdown_content: str, _output_pdf_path: Path) -> None:
         raise AttributeError("'super' object has no attribute 'transform'")
 
-    monkeypatch.setattr(helper, "render_markdown_to_pdf", _failing_render_markdown_to_pdf)
-    monkeypatch.setattr(helper, "PUBLIC_PDF_DIR", pdf_dir)
+    monkeypatch.setattr(PDFHelper, "render_markdown_to_pdf", _failing_render_markdown_to_pdf)
+    monkeypatch.setattr(markdown_helper, "PUBLIC_PDF_DIR", pdf_dir)
 
-    helper.process_and_save_markdown(
+    MarkdownHelper.process_and_save_markdown(
         context="# Title",
         output_path=output_path,
         writer_agent=_WriterAgentStub(),
