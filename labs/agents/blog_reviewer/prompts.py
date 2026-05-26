@@ -1,4 +1,4 @@
-class BlogReviewerPrompt:
+class LabReviewerPrompt:
     """Prompt templates for reviewing and improving blog posts."""
 
     @staticmethod

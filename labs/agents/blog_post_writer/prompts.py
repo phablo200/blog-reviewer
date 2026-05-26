@@ -1,4 +1,4 @@
-class BlogPostWriterPrompt:
+class LabPostWriterPrompt:
     """Prompt templates for blog post writing and structuring."""
 
     @staticmethod

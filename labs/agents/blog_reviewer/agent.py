@@ -8,15 +8,15 @@ from langchain_core.messages import HumanMessage, SystemMessage
 
 from core.llm_config import LLMProvider, build_chat_model
 
-from .prompts import BlogReviewerPrompt
+from .prompts import LabReviewerPrompt
 from .schema import (
-    BlogReviewerRequest,
-    BlogReviewerResponse,
-    BlogReviewerStructuredResponse,
+    LabReviewerRequest,
+    LabReviewerResponse,
+    LabReviewerStructuredResponse,
 )
 
 
-class BlogReviewerAgent:
+class LabReviewerAgent:
     """Agent responsible for revising blog posts in Markdown."""
 
     def __init__(self) -> None:
@@ -37,15 +37,15 @@ class BlogReviewerAgent:
             return normalized
         return []
 
-    def revise(self, request: BlogReviewerRequest) -> BlogReviewerResponse:
-        system_prompt = BlogReviewerPrompt.build_system_prompt()
+    def revise(self, request: LabReviewerRequest) -> LabReviewerResponse:
+        system_prompt = LabReviewerPrompt.build_system_prompt()
         messages = [
             SystemMessage(content=system_prompt),
             HumanMessage(content=request.content),
         ]
 
         try:
-            structured_llm = self.llm.with_structured_output(BlogReviewerStructuredResponse)
+            structured_llm = self.llm.with_structured_output(LabReviewerStructuredResponse)
             response = structured_llm.invoke(messages)
         except Exception:
             self.logger.exception(
@@ -53,7 +53,7 @@ class BlogReviewerAgent:
             )
             raw_response = self.llm.invoke(messages)
             raw_text = str(getattr(raw_response, "content", "")).strip()
-            return BlogReviewerResponse(
+            return LabReviewerResponse(
                 revised_post=raw_text or request.content,
                 errors_found=[],
                 improvement_tips=[],
@@ -82,8 +82,8 @@ class BlogReviewerAgent:
             response_data.get("next_revision_checklist")
         )
 
-        structured = BlogReviewerStructuredResponse.model_validate(response_data)
-        return BlogReviewerResponse(
+        structured = LabReviewerStructuredResponse.model_validate(response_data)
+        return LabReviewerResponse(
             revised_post=structured.revised_post,
             errors_found=structured.errors_found,
             improvement_tips=structured.improvement_tips,

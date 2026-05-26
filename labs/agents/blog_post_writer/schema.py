@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
 
-class BlogPostWriterRequest(BaseModel):
+class LabPostWriterRequest(BaseModel):
     """Raw sketch notes used to craft a structured blog post draft."""
 
     context: str = Field(
@@ -10,7 +10,7 @@ class BlogPostWriterRequest(BaseModel):
     )
 
 
-class BlogPostWriterResponse(BaseModel):
+class LabPostWriterResponse(BaseModel):
     """Reviewed blog post content in Markdown format."""
 
     reviewed_markdown: str = Field(

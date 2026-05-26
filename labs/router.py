@@ -2,12 +2,12 @@
 
 from fastapi import APIRouter, BackgroundTasks, File, HTTPException, UploadFile
 
-from blog.agents.blog_reviewer.schema import BlogReviewerRequest, BlogReviewerResponse
-from blog.service import BlogPostService
+from labs.agents.blog_reviewer.schema import LabReviewerRequest, LabReviewerResponse
+from labs.service import LabPostService
 
-router = APIRouter(prefix="/blog-post-writer", tags=["Blog Post Writer"])
+router = APIRouter(prefix="/labs", tags=["Blog Post Writer"])
 outputs_router = APIRouter(prefix="/outputs", tags=["Outputs"])
-service = BlogPostService()
+service = LabPostService()
 
 
 @router.post("/organize-notes")

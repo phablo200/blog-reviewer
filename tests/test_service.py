@@ -2,12 +2,13 @@ from pathlib import Path
 
 from fastapi import BackgroundTasks
 
-from blog.service import BlogPostService
+from labs.service import LabPostService
 
 
 def test_enqueue_markdown_organization_uses_public_markdowns_path() -> None:
-    service = BlogPostService.__new__(BlogPostService)
-    service.output_dir = Path("public/markdowns")
+    service = LabPostService.__new__(LabPostService)
+    service.markdown_output_dir = Path("public/markdown")
+    service.pdf_output_dir = Path("public/pdf")
     service.writer_agent = object()
     service.translator_agent = object()
 
@@ -17,4 +18,4 @@ def test_enqueue_markdown_organization_uses_public_markdowns_path() -> None:
         context="# Notes",
     )
 
-    assert "public/markdowns/example_reviewd.md" in result["output_file"]
+    assert "public/markdown/example_reviewd.md" in result["output_file"]

@@ -4,23 +4,24 @@ from typing import Any
 
 from fastapi import BackgroundTasks, HTTPException
 
-from blog.agents.blog_post_writer.agent import BlogPostWriterAgent
-from blog.agents.blog_post_translator.agent import BlogPostTranslatorAgent
-from blog.agents.blog_reviewer.agent import BlogReviewerAgent
-from blog.agents.blog_reviewer.schema import BlogReviewerRequest, BlogReviewerResponse
-from blog.contants import BLOG_POSTS_OUTPUT_DIR
-from blog.helper import list_markdown_files, list_output_files, process_and_save_markdown
+from labs.agents.blog_post_writer.agent import LabPostWriterAgent
+from labs.agents.blog_post_translator.agent import LabPostTranslatorAgent
+from labs.agents.blog_reviewer.agent import LabReviewerAgent
+from labs.agents.blog_reviewer.schema import LabReviewerRequest, LabReviewerResponse
+from labs.contants import PUBLIC_MARKDOWN_DIR, PUBLIC_PDF_DIR
+from labs.helper import list_markdown_files, list_output_files, process_and_save_markdown
 from pathlib import Path
 
 
-class BlogPostService:
+class LabPostService:
     """Orchestrates blog post generation/revision and file output."""
 
     def __init__(self) -> None:
-        self.writer_agent = BlogPostWriterAgent()
-        self.translator_agent = BlogPostTranslatorAgent()
-        self.reviewer_agent = BlogReviewerAgent()
-        self.output_dir = BLOG_POSTS_OUTPUT_DIR
+        self.writer_agent = LabPostWriterAgent()
+        self.translator_agent = LabPostTranslatorAgent()
+        self.reviewer_agent = LabReviewerAgent()
+        self.markdown_output_dir = PUBLIC_MARKDOWN_DIR
+        self.pdf_output_dir = PUBLIC_PDF_DIR
 
     def enqueue_markdown_organization(
         self, background_tasks: BackgroundTasks, filename: str, context: str
@@ -36,7 +37,7 @@ class BlogPostService:
             raise HTTPException(status_code=400, detail="Only .md files are supported.")
 
         output_name = f"{original_name.stem}_reviewd{original_name.suffix or '.md'}"
-        output_path = self.output_dir / output_name
+        output_path = self.markdown_output_dir / output_name
         background_tasks.add_task(
             process_and_save_markdown,
             context,
@@ -50,16 +51,16 @@ class BlogPostService:
             "output_file": str(output_path),
         }
 
-    def revise_blog_post(self, request: BlogReviewerRequest) -> BlogReviewerResponse:
+    def revise_blog_post(self, request: LabReviewerRequest) -> LabReviewerResponse:
         """Revise blog content through the revisor agent."""
         return self.reviewer_agent.revise(request)
 
     def list_markdown_outputs(self) -> dict[str, Any]:
         """List generated markdown outputs available in the public output folder."""
-        items = list_markdown_files(self.output_dir)
+        items = list_markdown_files(self.markdown_output_dir)
         return {"items": items, "count": len(items)}
 
     def list_pdf_outputs(self) -> dict[str, Any]:
         """List generated PDF outputs available in the public output folder."""
-        items = list_output_files(self.output_dir, ".pdf")
+        items = list_output_files(self.pdf_output_dir, ".pdf", "pdf")
         return {"items": items, "count": len(items)}

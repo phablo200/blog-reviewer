@@ -4,29 +4,29 @@ import logging
 
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from blog.agents.blog_reviewer.agent import BlogReviewerAgent
-from blog.agents.blog_reviewer.schema import BlogReviewerRequest
+from labs.agents.blog_reviewer.agent import LabReviewerAgent
+from labs.agents.blog_reviewer.schema import LabReviewerRequest
 from core.llm_config import LLMProvider, build_chat_model
 
 from .helper import enrich_context_with_repositories
-from .prompts import BlogPostWriterPrompt
-from .schema import BlogPostWriterRequest, BlogPostWriterResponse
+from .prompts import LabPostWriterPrompt
+from .schema import LabPostWriterRequest, LabPostWriterResponse
 
 
-class BlogPostWriterAgent:
+class LabPostWriterAgent:
     """Agent responsible for turning sketch notes into structured blog posts."""
 
     def __init__(self) -> None:
         """Initialize the chat model used by the agent."""
         self.logger = logging.getLogger(__name__)
         self.llm = build_chat_model(LLMProvider.OPENAI)
-        self.blog_reviwer = BlogReviewerAgent()
+        self.blog_reviwer = LabReviewerAgent()
 
-    def organize_notes(self, request: BlogPostWriterRequest) -> BlogPostWriterResponse:
+    def organize_notes(self, request: LabPostWriterRequest) -> LabPostWriterResponse:
         """Transform raw notes into a reviewed markdown blog post."""
         self.logger.info("blog_post_writer: starting organize_notes pipeline")
         enriched_context = enrich_context_with_repositories(request.context, self.logger)
-        system_prompt = BlogPostWriterPrompt.build_system_prompt()
+        system_prompt = LabPostWriterPrompt.build_system_prompt()
         messages = [
             SystemMessage(content=system_prompt),
             HumanMessage(content=enriched_context),
@@ -51,7 +51,7 @@ class BlogPostWriterAgent:
             self.logger.info("blog_post_writer: cycle %s/3 - requesting revision", iteration)
             try:
                 revised = self.blog_reviwer.revise(
-                    BlogReviewerRequest(content=current_markdown)
+                    LabReviewerRequest(content=current_markdown)
                 )
                 self.logger.info(
                     (
@@ -116,4 +116,4 @@ class BlogPostWriterAgent:
             "blog_post_writer: pipeline finished (final_chars=%s)",
             len(current_markdown),
         )
-        return BlogPostWriterResponse(reviewed_markdown=current_markdown)
+        return LabPostWriterResponse(reviewed_markdown=current_markdown)

@@ -1,4 +1,4 @@
-class BlogPostTranslatorPrompt:
+class LabPostTranslatorPrompt:
     """Prompt templates for translating reviewed blog posts."""
 
     @staticmethod

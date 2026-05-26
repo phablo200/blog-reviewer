@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
 
-class BlogPostTranslatorRequest(BaseModel):
+class LabPostTranslatorRequest(BaseModel):
     """Reviewed English markdown post that should be translated."""
 
     content: str = Field(
@@ -10,7 +10,7 @@ class BlogPostTranslatorRequest(BaseModel):
     )
 
 
-class BlogPostTranslatorResponse(BaseModel):
+class LabPostTranslatorResponse(BaseModel):
     """Translated blog post content in Brazilian Portuguese."""
 
     translated_markdown: str = Field(

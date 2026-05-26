@@ -1,7 +1,7 @@
 from pathlib import Path
 from types import SimpleNamespace
 
-import blog.helper as helper
+import labs.helper as helper
 
 
 class _WriterAgentStub:
@@ -21,6 +21,7 @@ class _FailingWriterAgentStub:
 
 def test_process_and_save_markdown_writes_reviewed_and_translated_files(tmp_path, monkeypatch) -> None:
     output_path = tmp_path / "my-post_reviewd.md"
+    pdf_dir = tmp_path / "pdf"
     generated_pdfs: list[Path] = []
 
     def _fake_render_markdown_to_pdf(_markdown_content: str, output_pdf_path: Path) -> None:
@@ -28,6 +29,7 @@ def test_process_and_save_markdown_writes_reviewed_and_translated_files(tmp_path
         generated_pdfs.append(output_pdf_path)
 
     monkeypatch.setattr(helper, "render_markdown_to_pdf", _fake_render_markdown_to_pdf)
+    monkeypatch.setattr(helper, "PUBLIC_PDF_DIR", pdf_dir)
 
     helper.process_and_save_markdown(
         context="# Title",
@@ -38,11 +40,11 @@ def test_process_and_save_markdown_writes_reviewed_and_translated_files(tmp_path
 
     assert output_path.exists()
     assert output_path.with_name("my-post_reviewd_pt_br.md").exists()
-    assert output_path.with_suffix(".pdf").exists()
-    assert output_path.with_name("my-post_reviewd_pt_br.pdf").exists()
+    assert (pdf_dir / "my-post_reviewd.pdf").exists()
+    assert (pdf_dir / "my-post_reviewd_pt_br.pdf").exists()
     assert generated_pdfs == [
-        output_path.with_suffix(".pdf"),
-        output_path.with_name("my-post_reviewd_pt_br.pdf"),
+        pdf_dir / "my-post_reviewd.pdf",
+        pdf_dir / "my-post_reviewd_pt_br.pdf",
     ]
 
 
@@ -59,3 +61,28 @@ def test_process_and_save_markdown_writes_error_file_on_failure(tmp_path) -> Non
     content = output_path.read_text(encoding="utf-8")
     assert "Failed to process markdown notes." in content
     assert "writer failed" in content
+
+
+def test_process_and_save_markdown_preserves_markdown_when_pdf_generation_fails(
+    tmp_path, monkeypatch
+) -> None:
+    output_path = tmp_path / "my-post_reviewd.md"
+    pdf_dir = tmp_path / "pdf"
+
+    def _failing_render_markdown_to_pdf(_markdown_content: str, _output_pdf_path: Path) -> None:
+        raise AttributeError("'super' object has no attribute 'transform'")
+
+    monkeypatch.setattr(helper, "render_markdown_to_pdf", _failing_render_markdown_to_pdf)
+    monkeypatch.setattr(helper, "PUBLIC_PDF_DIR", pdf_dir)
+
+    helper.process_and_save_markdown(
+        context="# Title",
+        output_path=output_path,
+        writer_agent=_WriterAgentStub(),
+        translator_agent=_TranslatorAgentStub(),
+    )
+
+    content = output_path.read_text(encoding="utf-8")
+    assert "Failed to process markdown notes." not in content
+    assert "title:" in content
+    assert output_path.with_name("my-post_reviewd_pt_br.md").exists()

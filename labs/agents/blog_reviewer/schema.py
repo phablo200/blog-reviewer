@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
 
-class BlogReviewerRequest(BaseModel):
+class LabReviewerRequest(BaseModel):
     """Raw markdown post that should be revised."""
 
     content: str = Field(
@@ -10,7 +10,7 @@ class BlogReviewerRequest(BaseModel):
     )
 
 
-class BlogReviewerStructuredResponse(BaseModel):
+class LabReviewerStructuredResponse(BaseModel):
     """Structured response produced by the model."""
 
     revised_post: str = Field(
@@ -31,7 +31,7 @@ class BlogReviewerStructuredResponse(BaseModel):
     )
 
 
-class BlogReviewerResponse(BaseModel):
+class LabReviewerResponse(BaseModel):
     """Reviewed post and structured feedback."""
 
     revised_post: str = Field(
