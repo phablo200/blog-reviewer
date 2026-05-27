@@ -9,7 +9,7 @@ from labs.agents.labs_code_example.agent import LabCodeExampleAgent
 from labs.agents.labs_code_example.schema import LabCodeExampleRequest
 from labs.agents.labs_reviewer.agent import LabReviewerAgent
 from labs.agents.labs_reviewer.schema import LabReviewerRequest
-from core.llm_config import AgentRole, build_chat_model_for_agent
+from core.llm_config import AgentRole, LLMConfig
 
 from .helper import enrich_context_with_repositories
 from .prompts import LabPostWriterPrompt
@@ -22,7 +22,7 @@ class LabPostWriterAgent:
     def __init__(self, llm: BaseChatModel | None = None) -> None:
         """Initialize the chat model used by the agent."""
         self.logger = logging.getLogger(__name__)
-        self.llm = llm or build_chat_model_for_agent(AgentRole.POST_WRITER)
+        self.llm = llm or LLMConfig.build_chat_model_for_agent(AgentRole.POST_WRITER)
         self.blog_reviwer = LabReviewerAgent()
         self.code_example_agent = LabCodeExampleAgent()
 

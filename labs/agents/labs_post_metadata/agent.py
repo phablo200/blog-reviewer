@@ -6,7 +6,7 @@ import logging
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from core.llm_config import AgentRole, build_chat_model_for_agent
+from core.llm_config import AgentRole, LLMConfig
 
 from .prompts import LabPostMetadataPrompt
 from .schema import LabPostMetadataRequest, LabPostMetadataResponse
@@ -17,7 +17,7 @@ class LabPostMetadataAgent:
 
     def __init__(self, llm: BaseChatModel | None = None) -> None:
         self.logger = logging.getLogger(__name__)
-        self.llm = llm or build_chat_model_for_agent(AgentRole.METADATA)
+        self.llm = llm or LLMConfig.build_chat_model_for_agent(AgentRole.METADATA)
 
     def generate(self, request: LabPostMetadataRequest) -> LabPostMetadataResponse:
         """Generate structured metadata with resilient fallback behavior."""

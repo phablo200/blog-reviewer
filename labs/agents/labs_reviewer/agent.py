@@ -7,7 +7,7 @@ import re
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from core.llm_config import AgentRole, build_chat_model_for_agent
+from core.llm_config import AgentRole, LLMConfig
 
 from .prompts import LabReviewerPrompt
 from .schema import (
@@ -22,7 +22,7 @@ class LabReviewerAgent:
 
     def __init__(self, llm: BaseChatModel | None = None) -> None:
         self.logger = logging.getLogger(__name__)
-        self.llm = llm or build_chat_model_for_agent(AgentRole.REVIEWER)
+        self.llm = llm or LLMConfig.build_chat_model_for_agent(AgentRole.REVIEWER)
 
     @staticmethod
     def _normalize_list_field(value: object) -> list[str]:

@@ -5,7 +5,7 @@ import logging
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from core.llm_config import AgentRole, build_chat_model_for_agent
+from core.llm_config import AgentRole, LLMConfig
 
 from .prompts import LabPostTranslatorPrompt
 from .schema import LabPostTranslatorRequest, LabPostTranslatorResponse
@@ -16,7 +16,7 @@ class LabPostTranslatorAgent:
 
     def __init__(self, llm: BaseChatModel | None = None) -> None:
         self.logger = logging.getLogger(__name__)
-        self.llm = llm or build_chat_model_for_agent(AgentRole.TRANSLATOR)
+        self.llm = llm or LLMConfig.build_chat_model_for_agent(AgentRole.TRANSLATOR)
 
     def translate(self, request: LabPostTranslatorRequest) -> LabPostTranslatorResponse:
         """Translate reviewed English markdown into Brazilian Portuguese."""

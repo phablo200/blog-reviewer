@@ -4,7 +4,7 @@ from typing import Any
 
 from fastapi import BackgroundTasks, HTTPException
 
-from core.llm_config import AgentRole, build_chat_model_for_agent
+from core.llm_config import AgentRole, LLMConfig
 from labs.agents.labs_code_example.agent import LabCodeExampleAgent
 from labs.agents.labs_post_metadata.agent import LabPostMetadataAgent
 from labs.agents.labs_post_writer.agent import LabPostWriterAgent
@@ -21,11 +21,11 @@ class LabPostService:
     """Orchestrates blog post generation/revision and file output."""
 
     def __init__(self) -> None:
-        reviewer_llm = build_chat_model_for_agent(AgentRole.REVIEWER)
-        code_example_llm = build_chat_model_for_agent(AgentRole.CODE_EXAMPLE)
-        writer_llm = build_chat_model_for_agent(AgentRole.POST_WRITER)
-        metadata_llm = build_chat_model_for_agent(AgentRole.METADATA)
-        translator_llm = build_chat_model_for_agent(AgentRole.TRANSLATOR)
+        reviewer_llm = LLMConfig.build_chat_model_for_agent(AgentRole.REVIEWER)
+        code_example_llm = LLMConfig.build_chat_model_for_agent(AgentRole.CODE_EXAMPLE)
+        writer_llm = LLMConfig.build_chat_model_for_agent(AgentRole.POST_WRITER)
+        metadata_llm = LLMConfig.build_chat_model_for_agent(AgentRole.METADATA)
+        translator_llm = LLMConfig.build_chat_model_for_agent(AgentRole.TRANSLATOR)
 
         reviewer_agent = LabReviewerAgent(llm=reviewer_llm)
         code_example_agent = LabCodeExampleAgent(llm=code_example_llm)

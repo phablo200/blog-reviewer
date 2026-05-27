@@ -52,7 +52,7 @@ def test_service_initialization_wires_role_models(monkeypatch) -> None:
         def __init__(self, llm=None):
             self.llm = llm
 
-    monkeypatch.setattr(service_module, "build_chat_model_for_agent", _build_model)
+    monkeypatch.setattr(service_module.LLMConfig, "build_chat_model_for_agent", _build_model)
     monkeypatch.setattr(service_module, "LabPostWriterAgent", _WriterStub)
     monkeypatch.setattr(service_module, "LabPostTranslatorAgent", _TranslatorStub)
     monkeypatch.setattr(service_module, "LabPostMetadataAgent", _MetadataStub)
