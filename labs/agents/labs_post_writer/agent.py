@@ -4,6 +4,8 @@ import logging
 
 from langchain_core.messages import HumanMessage, SystemMessage
 
+from labs.agents.labs_code_example.agent import LabCodeExampleAgent
+from labs.agents.labs_code_example.schema import LabCodeExampleRequest
 from labs.agents.labs_reviewer.agent import LabReviewerAgent
 from labs.agents.labs_reviewer.schema import LabReviewerRequest
 from core.llm_config import LLMProvider, build_chat_model
@@ -21,15 +23,54 @@ class LabPostWriterAgent:
         self.logger = logging.getLogger(__name__)
         self.llm = build_chat_model(LLMProvider.OPENAI)
         self.blog_reviwer = LabReviewerAgent()
+        self.code_example_agent = LabCodeExampleAgent()
+
+    @staticmethod
+    def _build_code_examples_context(examples_response) -> str:
+        if not examples_response.examples:
+            return ""
+
+        lines = ["## Code Examples Context", examples_response.summary.strip()]
+        for item in examples_response.examples:
+            snippet = item.snippet.strip()
+            if len(snippet) > 1200:
+                snippet = snippet[:1200].rstrip() + "\n..."
+            lines.extend(
+                [
+                    f"- Repository: {item.repository}",
+                    f"- File: {item.file_path}",
+                    f"- Language: {item.language}",
+                    f"- Why it matters: {item.why_it_matters}",
+                    f"- Integration hint: {item.integration_hint}",
+                    "```",
+                    snippet,
+                    "```",
+                    "",
+                ]
+            )
+        return "\n".join(lines).strip()
 
     def organize_notes(self, request: LabPostWriterRequest) -> LabPostWriterResponse:
         """Transform raw notes into a reviewed markdown blog post."""
         self.logger.info("blog_post_writer: starting organize_notes pipeline")
         enriched_context = enrich_context_with_repositories(request.context, self.logger)
+        examples_response = self.code_example_agent.extract_examples(
+            LabCodeExampleRequest(
+                notes_context=request.context,
+                max_examples=3,
+            )
+        )
+        for warning in examples_response.warnings:
+            self.logger.warning("blog_post_writer: code example warning: %s", warning)
+
+        code_examples_context = self._build_code_examples_context(examples_response)
+        final_context = enriched_context
+        if code_examples_context:
+            final_context = f"{enriched_context}\n\n{code_examples_context}"
         system_prompt = LabPostWriterPrompt.build_system_prompt()
         messages = [
             SystemMessage(content=system_prompt),
-            HumanMessage(content=enriched_context),
+            HumanMessage(content=final_context),
         ]
 
         self.logger.info("blog_post_writer: generating initial draft")
@@ -73,6 +114,8 @@ class LabPostWriterAgent:
             improvement_prompt = (
                 "You are improving a blog post after editorial review.\n\n"
                 "Apply all relevant corrections and suggestions while preserving the intent.\n\n"
+                "If repository-based code examples exist, keep at least one concrete example "
+                "and improve technical accuracy of the explanation.\n\n"
                 "Current post:\n"
                 f"{current_markdown}\n\n"
                 "Editor revised version:\n"

@@ -15,9 +15,10 @@ Rules:
 2. Improve clarity, grammar, punctuation, structure, and flow.
 3. Remove redundancy, vague phrasing, and awkward sentences.
 4. Keep the tone practical, natural, and consistent.
-5. Return output only in Markdown.
-6. Do not return JSON.
-7. Do not add text outside the required Markdown sections.
+5. Validate technical correctness and clarity of any code examples included.
+6. Return output only in Markdown.
+7. Do not return JSON.
+8. Do not add text outside the required Markdown sections.
 
 Required output format (always use these exact section titles):
 
