@@ -3,9 +3,10 @@
 from collections.abc import Mapping
 import logging
 
+from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from core.llm_config import LLMProvider, build_chat_model
+from core.llm_config import AgentRole, build_chat_model_for_agent
 
 from .prompts import LabPostMetadataPrompt
 from .schema import LabPostMetadataRequest, LabPostMetadataResponse
@@ -14,9 +15,9 @@ from .schema import LabPostMetadataRequest, LabPostMetadataResponse
 class LabPostMetadataAgent:
     """Generate frontmatter metadata from reviewed markdown content."""
 
-    def __init__(self) -> None:
+    def __init__(self, llm: BaseChatModel | None = None) -> None:
         self.logger = logging.getLogger(__name__)
-        self.llm = build_chat_model(LLMProvider.OPENAI)
+        self.llm = llm or build_chat_model_for_agent(AgentRole.METADATA)
 
     def generate(self, request: LabPostMetadataRequest) -> LabPostMetadataResponse:
         """Generate structured metadata with resilient fallback behavior."""

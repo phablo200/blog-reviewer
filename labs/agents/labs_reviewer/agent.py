@@ -4,9 +4,10 @@ from collections.abc import Mapping
 import logging
 import re
 
+from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from core.llm_config import LLMProvider, build_chat_model
+from core.llm_config import AgentRole, build_chat_model_for_agent
 
 from .prompts import LabReviewerPrompt
 from .schema import (
@@ -19,9 +20,9 @@ from .schema import (
 class LabReviewerAgent:
     """Agent responsible for revising blog posts in Markdown."""
 
-    def __init__(self) -> None:
+    def __init__(self, llm: BaseChatModel | None = None) -> None:
         self.logger = logging.getLogger(__name__)
-        self.llm = build_chat_model(LLMProvider.GROQ)
+        self.llm = llm or build_chat_model_for_agent(AgentRole.REVIEWER)
 
     @staticmethod
     def _normalize_list_field(value: object) -> list[str]:

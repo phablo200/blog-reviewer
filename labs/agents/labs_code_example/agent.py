@@ -9,9 +9,10 @@ import logging
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
+from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from core.llm_config import LLMProvider, build_chat_model
+from core.llm_config import AgentRole, build_chat_model_for_agent
 from labs.agents.labs_post_writer.constants import GITHUB_REPO_URL_PATTERN
 
 from .prompts import LabCodeExamplePrompt
@@ -24,9 +25,9 @@ class LabCodeExampleAgent:
     MAX_FILE_EXCERPT_CHARS = 2500
     MAX_FILES_PER_REPO = 3
 
-    def __init__(self) -> None:
+    def __init__(self, llm: BaseChatModel | None = None) -> None:
         self.logger = logging.getLogger(__name__)
-        self.llm = build_chat_model(LLMProvider.OPENAI)
+        self.llm = llm or build_chat_model_for_agent(AgentRole.CODE_EXAMPLE)
 
     @staticmethod
     def _extract_repositories(text: str) -> list[str]:

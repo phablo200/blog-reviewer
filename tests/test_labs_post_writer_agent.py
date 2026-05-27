@@ -45,7 +45,7 @@ class _CodeExampleAgentStub:
 def test_organize_notes_includes_code_examples_context(monkeypatch) -> None:
     llm = _LLMStub()
 
-    monkeypatch.setattr(writer_module, "build_chat_model", lambda _provider: llm)
+    monkeypatch.setattr(writer_module, "build_chat_model_for_agent", lambda _role: llm)
     monkeypatch.setattr(
         writer_module,
         "enrich_context_with_repositories",

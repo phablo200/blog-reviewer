@@ -2,13 +2,14 @@
 
 import logging
 
+from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from labs.agents.labs_code_example.agent import LabCodeExampleAgent
 from labs.agents.labs_code_example.schema import LabCodeExampleRequest
 from labs.agents.labs_reviewer.agent import LabReviewerAgent
 from labs.agents.labs_reviewer.schema import LabReviewerRequest
-from core.llm_config import LLMProvider, build_chat_model
+from core.llm_config import AgentRole, build_chat_model_for_agent
 
 from .helper import enrich_context_with_repositories
 from .prompts import LabPostWriterPrompt
@@ -18,10 +19,10 @@ from .schema import LabPostWriterRequest, LabPostWriterResponse
 class LabPostWriterAgent:
     """Agent responsible for turning sketch notes into structured blog posts."""
 
-    def __init__(self) -> None:
+    def __init__(self, llm: BaseChatModel | None = None) -> None:
         """Initialize the chat model used by the agent."""
         self.logger = logging.getLogger(__name__)
-        self.llm = build_chat_model(LLMProvider.OPENAI)
+        self.llm = llm or build_chat_model_for_agent(AgentRole.POST_WRITER)
         self.blog_reviwer = LabReviewerAgent()
         self.code_example_agent = LabCodeExampleAgent()
 

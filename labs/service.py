@@ -4,6 +4,8 @@ from typing import Any
 
 from fastapi import BackgroundTasks, HTTPException
 
+from core.llm_config import AgentRole, build_chat_model_for_agent
+from labs.agents.labs_code_example.agent import LabCodeExampleAgent
 from labs.agents.labs_post_metadata.agent import LabPostMetadataAgent
 from labs.agents.labs_post_writer.agent import LabPostWriterAgent
 from labs.agents.labs_post_translator.agent import LabPostTranslatorAgent
@@ -19,10 +21,20 @@ class LabPostService:
     """Orchestrates blog post generation/revision and file output."""
 
     def __init__(self) -> None:
-        self.writer_agent = LabPostWriterAgent()
-        self.translator_agent = LabPostTranslatorAgent()
-        self.metadata_agent = LabPostMetadataAgent()
-        self.reviewer_agent = LabReviewerAgent()
+        reviewer_llm = build_chat_model_for_agent(AgentRole.REVIEWER)
+        code_example_llm = build_chat_model_for_agent(AgentRole.CODE_EXAMPLE)
+        writer_llm = build_chat_model_for_agent(AgentRole.POST_WRITER)
+        metadata_llm = build_chat_model_for_agent(AgentRole.METADATA)
+        translator_llm = build_chat_model_for_agent(AgentRole.TRANSLATOR)
+
+        reviewer_agent = LabReviewerAgent(llm=reviewer_llm)
+        code_example_agent = LabCodeExampleAgent(llm=code_example_llm)
+        self.writer_agent = LabPostWriterAgent(llm=writer_llm)
+        self.writer_agent.blog_reviwer = reviewer_agent
+        self.writer_agent.code_example_agent = code_example_agent
+        self.translator_agent = LabPostTranslatorAgent(llm=translator_llm)
+        self.metadata_agent = LabPostMetadataAgent(llm=metadata_llm)
+        self.reviewer_agent = reviewer_agent
         self.markdown_output_dir = PUBLIC_MARKDOWN_DIR
         self.pdf_output_dir = PUBLIC_PDF_DIR
 
