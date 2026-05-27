@@ -4,6 +4,7 @@ from typing import Any
 
 from fastapi import BackgroundTasks, HTTPException
 
+from labs.agents.labs_post_metadata.agent import LabPostMetadataAgent
 from labs.agents.labs_post_writer.agent import LabPostWriterAgent
 from labs.agents.labs_post_translator.agent import LabPostTranslatorAgent
 from labs.agents.labs_reviewer.agent import LabReviewerAgent
@@ -20,6 +21,7 @@ class LabPostService:
     def __init__(self) -> None:
         self.writer_agent = LabPostWriterAgent()
         self.translator_agent = LabPostTranslatorAgent()
+        self.metadata_agent = LabPostMetadataAgent()
         self.reviewer_agent = LabReviewerAgent()
         self.markdown_output_dir = PUBLIC_MARKDOWN_DIR
         self.pdf_output_dir = PUBLIC_PDF_DIR
@@ -45,6 +47,7 @@ class LabPostService:
             output_path,
             self.writer_agent,
             self.translator_agent,
+            self.metadata_agent,
         )
 
         return {

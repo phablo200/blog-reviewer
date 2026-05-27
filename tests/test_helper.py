@@ -16,6 +16,17 @@ class _TranslatorAgentStub:
         return SimpleNamespace(translated_markdown=request.content)
 
 
+class _MetadataAgentStub:
+    def generate(self, _request):
+        return SimpleNamespace(
+            title="Testando o Fluxo: Um Guia Pratico",
+            date="2023-10-10",
+            summary="Uma exploracao pratica dos processos de teste.",
+            tags=["Carreira", "Meta"],
+            published=True,
+        )
+
+
 class _FailingWriterAgentStub:
     def organize_notes(self, request):
         raise RuntimeError("writer failed")
@@ -38,6 +49,7 @@ def test_process_and_save_markdown_writes_reviewed_and_translated_files(tmp_path
         output_path=output_path,
         writer_agent=_WriterAgentStub(),
         translator_agent=_TranslatorAgentStub(),
+        metadata_agent=_MetadataAgentStub(),
     )
 
     assert output_path.exists()
@@ -58,6 +70,7 @@ def test_process_and_save_markdown_writes_error_file_on_failure(tmp_path) -> Non
         output_path=output_path,
         writer_agent=_FailingWriterAgentStub(),
         translator_agent=_TranslatorAgentStub(),
+        metadata_agent=_MetadataAgentStub(),
     )
 
     content = output_path.read_text(encoding="utf-8")
@@ -82,6 +95,7 @@ def test_process_and_save_markdown_preserves_markdown_when_pdf_generation_fails(
         output_path=output_path,
         writer_agent=_WriterAgentStub(),
         translator_agent=_TranslatorAgentStub(),
+        metadata_agent=_MetadataAgentStub(),
     )
 
     content = output_path.read_text(encoding="utf-8")

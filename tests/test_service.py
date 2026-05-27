@@ -11,6 +11,7 @@ def test_enqueue_markdown_organization_uses_public_markdowns_path() -> None:
     service.pdf_output_dir = Path("public/pdf")
     service.writer_agent = object()
     service.translator_agent = object()
+    service.metadata_agent = object()
 
     result = service.enqueue_markdown_organization(
         background_tasks=BackgroundTasks(),

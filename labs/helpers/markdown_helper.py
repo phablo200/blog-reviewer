@@ -4,6 +4,7 @@ from datetime import date
 import logging
 from pathlib import Path
 
+from labs.agents.labs_post_metadata.schema import LabPostMetadataRequest, LabPostMetadataResponse
 from labs.agents.labs_post_translator.schema import LabPostTranslatorRequest
 from labs.agents.labs_post_writer.schema import LabPostWriterRequest
 from labs.contants import PUBLIC_PDF_DIR
@@ -82,11 +83,70 @@ published: true
         return f"{normalized_frontmatter}\n{body}".rstrip() + "\n"
 
     @staticmethod
+    def _default_metadata() -> LabPostMetadataResponse:
+        return LabPostMetadataResponse(
+            title="Hello, world: why I started this blog",
+            date=date.today().isoformat(),
+            summary=(
+                "After 9+ years building software, I decided to write about what I learn "
+                "along the way. Here is why and what to expect."
+            ),
+            tags=["Career", "Meta"],
+            published=True,
+        )
+
+    @staticmethod
+    def _normalize_metadata(metadata: LabPostMetadataResponse | None) -> LabPostMetadataResponse:
+        defaults = MarkdownHelper._default_metadata()
+        if metadata is None:
+            return defaults
+
+        title = metadata.title.strip() or defaults.title
+        metadata_date = metadata.date.strip() or defaults.date
+        summary = metadata.summary.strip() or defaults.summary
+        tags = [tag.strip() for tag in metadata.tags if str(tag).strip()] or defaults.tags
+        published = metadata.published
+        return LabPostMetadataResponse(
+            title=title,
+            date=metadata_date,
+            summary=summary,
+            tags=tags,
+            published=published,
+        )
+
+    @staticmethod
+    def build_frontmatter(metadata: LabPostMetadataResponse | None) -> str:
+        """Build deterministic frontmatter block from normalized metadata."""
+        normalized = MarkdownHelper._normalize_metadata(metadata)
+        tags = ", ".join(f'"{tag}"' for tag in normalized.tags)
+        published_text = "true" if normalized.published else "false"
+        return (
+            "---\n"
+            f'title: "{normalized.title}"\n'
+            f'date: "{normalized.date}"\n'
+            f'summary: "{normalized.summary}"\n'
+            f"tags: [{tags}]\n"
+            f"published: {published_text}\n"
+            "---\n"
+        )
+
+    @staticmethod
+    def compose_markdown_with_metadata(
+        markdown_body: str, metadata: LabPostMetadataResponse | None
+    ) -> str:
+        """Replace any existing frontmatter with metadata frontmatter."""
+        _, body = MarkdownHelper._extract_frontmatter(markdown_body)
+        clean_body = body.strip() if body else markdown_body.strip()
+        frontmatter = MarkdownHelper.build_frontmatter(metadata)
+        return f"{frontmatter}\n{clean_body}\n"
+
+    @staticmethod
     def process_and_save_markdown(
         context: str,
         output_path: Path,
         writer_agent,
         translator_agent,
+        metadata_agent,
     ) -> None:
         """Generate reviewed + translated markdown, then persist markdown and PDFs."""
         output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -94,8 +154,17 @@ published: true
         reviewed_markdown_written = False
         try:
             response = writer_agent.organize_notes(LabPostWriterRequest(context=context))
-            normalized_reviewed_markdown = MarkdownHelper.ensure_required_frontmatter(
-                response.reviewed_markdown
+            metadata_response: LabPostMetadataResponse | None = None
+            try:
+                metadata_response = metadata_agent.generate(
+                    LabPostMetadataRequest(content=response.reviewed_markdown)
+                )
+            except Exception:
+                logger.exception("Metadata generation failed, using fallback metadata")
+
+            normalized_reviewed_markdown = MarkdownHelper.compose_markdown_with_metadata(
+                response.reviewed_markdown,
+                metadata_response,
             )
             output_path.write_text(normalized_reviewed_markdown, encoding="utf-8")
             reviewed_markdown_written = True
@@ -106,8 +175,9 @@ published: true
             pt_br_output_path = output_path.with_name(
                 f"{output_path.stem}_pt_br{output_path.suffix}"
             )
-            normalized_translated_markdown = MarkdownHelper.ensure_required_frontmatter(
-                translated_response.translated_markdown
+            normalized_translated_markdown = MarkdownHelper.compose_markdown_with_metadata(
+                translated_response.translated_markdown,
+                metadata_response,
             )
             pt_br_output_path.write_text(
                 normalized_translated_markdown,
