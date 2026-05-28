@@ -16,11 +16,12 @@ class LabPostTranslatorAgent:
 
     def __init__(self, llm: BaseChatModel | None = None) -> None:
         self.logger = logging.getLogger(__name__)
+        self.agent_name = AgentRole.TRANSLATOR
         self.llm = llm or LLMConfig.build_chat_model_for_agent(AgentRole.TRANSLATOR)
 
     def translate(self, request: LabPostTranslatorRequest) -> LabPostTranslatorResponse:
         """Translate reviewed English markdown into Brazilian Portuguese."""
-        self.logger.info("blog_post_translator: starting translation")
+        self.logger.info("agent=%s | starting translation", self.agent_name)
         system_prompt = LabPostTranslatorPrompt.build_system_prompt()
         messages = [
             SystemMessage(content=system_prompt),
@@ -32,12 +33,14 @@ class LabPostTranslatorAgent:
 
         if not translated_markdown:
             self.logger.warning(
-                "blog_post_translator: empty translation, using source markdown fallback"
+                "agent=%s | empty translation, using source markdown fallback",
+                self.agent_name,
             )
             translated_markdown = request.content
         else:
             self.logger.info(
-                "blog_post_translator: translation generated (chars=%s)",
+                "agent=%s | translation generated (chars=%s)",
+                self.agent_name,
                 len(translated_markdown),
             )
 

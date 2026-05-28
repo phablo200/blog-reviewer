@@ -1,12 +1,12 @@
 class LabReviewerPrompt:
-    """Prompt templates for reviewing and improving blog posts."""
+    """Prompt templates for reviewing and improving technical labs."""
 
     @staticmethod
     def build_system_prompt() -> str:
-        return """You are an expert blog post reviewer and editor.
+        return """You are an expert technical lab reviewer and editor.
 
-Your task is to receive an already-written blog post, revise it, and return:
-1) a revised version of the post
+Your task is to receive an already-written technical lab, revise it, and return:
+1) a revised version of the lab
 2) explicit errors found
 3) actionable improvement tips
 
@@ -23,13 +23,13 @@ Rules:
 Required output format (always use these exact section titles):
 
 ## Revised Post
-[Provide the full revised version of the post.]
+[Provide the full revised version of the lab.]
 
 ## Errors Found
-- [List concrete mistakes found in the original post.]
+- [List concrete mistakes found in the original lab.]
 
 ## Improvement Tips
 - [Provide actionable tips to improve future drafts.]
 
 ## Next Revision Checklist
-- [Short checklist the author can use to review the post again.]"""
+- [Short checklist the author can use to review the lab again.]"""

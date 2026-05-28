@@ -22,6 +22,7 @@ class LabPostWriterAgent:
     def __init__(self, llm: BaseChatModel | None = None) -> None:
         """Initialize the chat model used by the agent."""
         self.logger = logging.getLogger(__name__)
+        self.agent_name = AgentRole.POST_WRITER
         self.llm = llm or LLMConfig.build_chat_model_for_agent(AgentRole.POST_WRITER)
         self.blog_reviwer = LabReviewerAgent()
         self.code_example_agent = LabCodeExampleAgent()
@@ -53,7 +54,7 @@ class LabPostWriterAgent:
 
     def organize_notes(self, request: LabPostWriterRequest) -> LabPostWriterResponse:
         """Transform raw notes into a reviewed markdown blog post."""
-        self.logger.info("blog_post_writer: starting organize_notes pipeline")
+        self.logger.info("agent=%s | starting organize_notes pipeline", self.agent_name)
         enriched_context = enrich_context_with_repositories(request.context, self.logger)
         examples_response = self.code_example_agent.extract_examples(
             LabCodeExampleRequest(
@@ -62,7 +63,9 @@ class LabPostWriterAgent:
             )
         )
         for warning in examples_response.warnings:
-            self.logger.warning("blog_post_writer: code example warning: %s", warning)
+            self.logger.warning(
+                "agent=%s | code example warning: %s", self.agent_name, warning
+            )
 
         code_examples_context = self._build_code_examples_context(examples_response)
         final_context = enriched_context
@@ -74,32 +77,39 @@ class LabPostWriterAgent:
             HumanMessage(content=final_context),
         ]
 
-        self.logger.info("blog_post_writer: generating initial draft")
+        self.logger.info("agent=%s | generating initial draft", self.agent_name)
         response = self.llm.invoke(messages)
         current_markdown = str(getattr(response, "content", "")).strip()
         if not current_markdown:
             self.logger.warning(
-                "blog_post_writer: initial draft empty, using fallback message"
+                "agent=%s | initial draft empty, using fallback message",
+                self.agent_name,
             )
             current_markdown = "Unable to generate blog content from the provided notes."
         else:
             self.logger.info(
-                "blog_post_writer: initial draft generated (chars=%s)",
+                "agent=%s | initial draft generated (chars=%s)",
+                self.agent_name,
                 len(current_markdown),
             )
 
         # Run 3 full review/improvement cycles using both agents.
         for iteration in range(1, 4):
-            self.logger.info("blog_post_writer: cycle %s/3 - requesting revision", iteration)
+            self.logger.info(
+                "agent=%s | cycle %s/3 - requesting revision",
+                self.agent_name,
+                iteration,
+            )
             try:
                 revised = self.blog_reviwer.revise(
                     LabReviewerRequest(content=current_markdown)
                 )
                 self.logger.info(
                     (
-                        "blog_post_writer: cycle %s/3 - revision received "
+                        "agent=%s | cycle %s/3 - revision received "
                         "(errors=%s, tips=%s, checklist=%s)"
                     ),
+                    self.agent_name,
                     iteration,
                     len(revised.errors_found),
                     len(revised.improvement_tips),
@@ -107,7 +117,8 @@ class LabPostWriterAgent:
                 )
             except Exception:
                 self.logger.exception(
-                    "blog_post_writer: cycle %s/3 - revision failed, stopping loop",
+                    "agent=%s | cycle %s/3 - revision failed, stopping loop",
+                    self.agent_name,
                     iteration,
                 )
                 break
@@ -130,7 +141,9 @@ class LabPostWriterAgent:
                 + "\n\nReturn only the final improved post in Markdown."
             )
 
-            self.logger.info("blog_post_writer: cycle %s/3 - improving post", iteration)
+            self.logger.info(
+                "agent=%s | cycle %s/3 - improving post", self.agent_name, iteration
+            )
             improved_response = self.llm.invoke(
                 [
                     SystemMessage(content=system_prompt),
@@ -141,7 +154,8 @@ class LabPostWriterAgent:
             if improved_markdown:
                 current_markdown = improved_markdown
                 self.logger.info(
-                    "blog_post_writer: cycle %s/3 - improvement applied (chars=%s)",
+                    "agent=%s | cycle %s/3 - improvement applied (chars=%s)",
+                    self.agent_name,
                     iteration,
                     len(current_markdown),
                 )
@@ -149,15 +163,17 @@ class LabPostWriterAgent:
                 current_markdown = revised.revised_post.strip() or current_markdown
                 self.logger.warning(
                     (
-                        "blog_post_writer: cycle %s/3 - empty improved response, "
+                        "agent=%s | cycle %s/3 - empty improved response, "
                         "using revised fallback (chars=%s)"
                     ),
+                    self.agent_name,
                     iteration,
                     len(current_markdown),
                 )
 
         self.logger.info(
-            "blog_post_writer: pipeline finished (final_chars=%s)",
+            "agent=%s | pipeline finished (final_chars=%s)",
+            self.agent_name,
             len(current_markdown),
         )
         return LabPostWriterResponse(reviewed_markdown=current_markdown)

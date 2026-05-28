@@ -9,7 +9,7 @@ You will receive:
 - sketch notes context
 - repository metadata and source excerpts fetched from GitHub
 
-Your output must be useful for writing a technical blog post.
+Your output must be useful for writing a technical lab.
 
 Rules:
 1. Use only information present in the provided repository excerpts.

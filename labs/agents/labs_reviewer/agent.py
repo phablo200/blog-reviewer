@@ -22,6 +22,7 @@ class LabReviewerAgent:
 
     def __init__(self, llm: BaseChatModel | None = None) -> None:
         self.logger = logging.getLogger(__name__)
+        self.agent_name = AgentRole.REVIEWER
         self.llm = llm or LLMConfig.build_chat_model_for_agent(AgentRole.REVIEWER)
 
     @staticmethod
@@ -50,7 +51,8 @@ class LabReviewerAgent:
             response = structured_llm.invoke(messages)
         except Exception:
             self.logger.exception(
-                "blog_reviewer: structured output failed, falling back to raw generation"
+                "agent=%s | structured output failed, falling back to raw generation",
+                self.agent_name,
             )
             raw_response = self.llm.invoke(messages)
             raw_text = str(getattr(raw_response, "content", "")).strip()

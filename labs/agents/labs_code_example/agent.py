@@ -27,6 +27,7 @@ class LabCodeExampleAgent:
 
     def __init__(self, llm: BaseChatModel | None = None) -> None:
         self.logger = logging.getLogger(__name__)
+        self.agent_name = AgentRole.CODE_EXAMPLE
         self.llm = llm or LLMConfig.build_chat_model_for_agent(AgentRole.CODE_EXAMPLE)
 
     @staticmethod
@@ -124,7 +125,12 @@ class LabCodeExampleAgent:
                 lines.append(f"File: {path}")
                 lines.append(excerpt)
             except Exception:
-                self.logger.info("labs_code_example: could not read file %s in %s", path, repository)
+                self.logger.info(
+                    "agent=%s | could not read file %s in %s",
+                    self.agent_name,
+                    path,
+                    repository,
+                )
 
         return "\n".join(lines)
 
@@ -166,7 +172,11 @@ class LabCodeExampleAgent:
             except TimeoutError:
                 warnings.append(f"Timeout while fetching {repository}.")
             except Exception:
-                self.logger.exception("labs_code_example: failed to fetch context for %s", repository)
+                self.logger.exception(
+                    "agent=%s | failed to fetch context for %s",
+                    self.agent_name,
+                    repository,
+                )
                 warnings.append(f"Unexpected fetch error for {repository}.")
 
         if not repo_context_sections:
@@ -187,7 +197,9 @@ class LabCodeExampleAgent:
             structured_llm = self.llm.with_structured_output(LabCodeExampleResponse)
             response = structured_llm.invoke(messages)
         except Exception:
-            self.logger.exception("labs_code_example: structured output failed")
+            self.logger.exception(
+                "agent=%s | structured output failed", self.agent_name
+            )
             return LabCodeExampleResponse(
                 examples=[],
                 summary="Failed to generate code examples.",
@@ -206,7 +218,9 @@ class LabCodeExampleAgent:
         try:
             parsed = LabCodeExampleResponse.model_validate(response_data)
         except Exception:
-            self.logger.exception("labs_code_example: invalid structured response")
+            self.logger.exception(
+                "agent=%s | invalid structured response", self.agent_name
+            )
             return LabCodeExampleResponse(
                 examples=[],
                 summary="Invalid structured response for code examples.",

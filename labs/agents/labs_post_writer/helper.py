@@ -6,6 +6,8 @@ from urllib.request import Request, urlopen
 
 from .constants import GITHUB_REPO_URL_PATTERN
 
+AGENT_NAME = "labs_post_writer"
+
 
 def extract_github_repositories(markdown: str) -> list[tuple[str, str]]:
     repositories: list[tuple[str, str]] = []
@@ -57,7 +59,9 @@ def build_repo_context(owner: str, repo: str, logger: logging.Logger) -> str:
                 "utf-8", errors="ignore"
             )
     except Exception:
-        logger.info("blog_post_writer: could not fetch README for %s/%s", owner, repo)
+        logger.info(
+            "agent=%s | could not fetch README for %s/%s", AGENT_NAME, owner, repo
+        )
 
     if readme_content:
         trimmed_readme = readme_content.strip()[:4000]
@@ -72,7 +76,9 @@ def enrich_context_with_repositories(context: str, logger: logging.Logger) -> st
     if not repositories:
         return context
 
-    logger.info("blog_post_writer: found %s github repository link(s)", len(repositories))
+    logger.info(
+        "agent=%s | found %s github repository link(s)", AGENT_NAME, len(repositories)
+    )
 
     repo_sections: list[str] = []
     for owner, repo in repositories:
@@ -80,27 +86,31 @@ def enrich_context_with_repositories(context: str, logger: logging.Logger) -> st
             repo_sections.append(build_repo_context(owner, repo, logger))
         except HTTPError as exc:
             logger.warning(
-                "blog_post_writer: could not fetch repository context for %s/%s (http=%s)",
+                "agent=%s | could not fetch repository context for %s/%s (http=%s)",
+                AGENT_NAME,
                 owner,
                 repo,
                 exc.code,
             )
         except URLError as exc:
             logger.warning(
-                "blog_post_writer: network error while fetching repository context for %s/%s (%s)",
+                "agent=%s | network error while fetching repository context for %s/%s (%s)",
+                AGENT_NAME,
                 owner,
                 repo,
                 exc.reason,
             )
         except TimeoutError:
             logger.warning(
-                "blog_post_writer: timeout while fetching repository context for %s/%s",
+                "agent=%s | timeout while fetching repository context for %s/%s",
+                AGENT_NAME,
                 owner,
                 repo,
             )
         except Exception:
             logger.exception(
-                "blog_post_writer: failed to fetch repository context for %s/%s",
+                "agent=%s | failed to fetch repository context for %s/%s",
+                AGENT_NAME,
                 owner,
                 repo,
             )

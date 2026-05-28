@@ -3,7 +3,7 @@ class LabPostMetadataPrompt:
 
     @staticmethod
     def build_system_prompt() -> str:
-        return """You generate blog post metadata from reviewed markdown content.
+        return """You generate technical lab metadata from reviewed markdown content.
 
 Output metadata in English with these fields:
 - title

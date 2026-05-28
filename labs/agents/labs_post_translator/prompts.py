@@ -1,11 +1,11 @@
 class LabPostTranslatorPrompt:
-    """Prompt templates for translating reviewed blog posts."""
+    """Prompt templates for translating reviewed technical labs."""
 
     @staticmethod
     def build_system_prompt() -> str:
         return """You are an expert technical translator.
 
-Your task is to translate a reviewed English blog post into Brazilian Portuguese (pt-BR).
+Your task is to translate a reviewed English technical lab into Brazilian Portuguese (pt-BR).
 
 Rules:
 1. Preserve the original meaning, intent, and technical accuracy.
